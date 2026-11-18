@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terraza Grill - Control Diario de Barra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #d95325;
+            --primary-hover: #c0451c;
+            --primary-light: rgba(217, 83, 37, 0.12);
+            --bg-dark: #121212;
+            --card-dark: #1e1e1e;
+            --border-color: #333333;
+            --text-main: #f5f5f5;
+            --text-muted: #a0a0a0;
+            --success: #2e7d32;
+            --success-bg: rgba(46, 125, 50, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Header Estilizado */
+        header {
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #d95325, #ff7b47);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(217, 83, 37, 0.4);
+        }
+
+        .brand-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: #ffffff;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .badge-bar {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            margin-left: 6px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Botón Calendario Principal */
+        .main-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(217, 83, 37, 0.3);
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .main-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--success-bg);
+            color: #4caf50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-info h3 {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stat-info p {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        /* Vistas */
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Calendario */
+        .calendar-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .cal-nav-btn {
+            background: #2a2a2a;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .cal-day-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding-bottom: 8px;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .cal-day:hover {
+            border-color: var(--primary);
+        }
+
+        .cal-day.today {
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .cal-day.has-data {
+            background: rgba(46, 125, 50, 0.2);
+            border-color: #2e7d32;
+            color: #81c784;
+        }
+
+        .dot-indicator {
+            width: 5px;
+            height: 5px;
+            background: #81c784;
+            border-radius: 50%;
+            margin-top: 3px;
+        }
+
+        /* Vista Inventario */
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            background: var(--card-dark);
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .inventory-table-container {
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            max-height: 60vh;
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+            min-width: 400px;
+        }
+
+        .inventory-table th {
+            background: #252525;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .inventory-table td {
+            padding: 10px;
+            border-bottom: 1px solid #222;
+            vertical-align: middle;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #eee;
+        }
+
+        .inv-input {
+            width: 65px;
+            background: #141414;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .inv-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .actions-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .btn-save {
+            flex: 2;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-export {
+            flex: 1;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Modal Requisición */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 480px;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .req-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: 50vh;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: #151515;
+            padding: 10px;
+        }
+
+        .req-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #222;
+            font-size: 13px;
+        }
+
+        .req-item:last-child {
+            border-bottom: none;
+        }
+
+        .req-qty {
+            font-weight: 700;
+            color: #ff7b47;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="logo-container">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            </div>
+            <div>
+                <h1>Terraza Grill <span class="badge-bar">Barra</span></h1>
+                <p class="subtitle">Cortes & Cocina • Control Diario de Inventario</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Home View -->
+    <div id="home-view" class="view-section active">
+        <button class="main-btn" onclick="showCalendarView()">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
+            Abrir Calendario de Inventario
+        </button>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <h3>Días con Inventario</h3>
+                    <p id="stat-days">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(217, 83, 37, 0.15); color: var(--primary);">🕒</div>
+                <div class="stat-info">
+                    <h3>Última Modificación</h3>
+                    <p id="stat-last" style="font-size: 14px; margin-top: 4px;">Ninguno</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div id="calendar-view" class="view-section">
+        <div class="day-header">
+            <button class="back-btn" onclick="showHomeView()">← Volver</button>
+            <h2 id="calendar-month-title" style="font-family:'Outfit', sans-serif; font-size: 16px;">Mes</h2>
+            <div style="display:flex; gap: 6px;">
+                <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+            </div>
+        </div>
+
+        <div class="calendar-card">
+            <div class="cal-grid">
+                <div class="cal-day-name">Lun</div>
+                <div class="cal-day-name">Mar</div>
+                <div class="cal-day-name">Mié</div>
+                <div class="cal-day-name">Jue</div>
+                <div class="cal-day-name">Vie</div>
+                <div class="cal-day-name">Sáb</div>
+                <div class="cal-day-name">Dom</div>
+            </div>
+            <div id="cal-days-grid" class="cal-grid" style="margin-top: 8px;"></div>
+        </div>
+    </div>
+
+    <!-- Inventory View -->
+    <div id="inventory-view" class="view-section">
+        <div class="day-header">
+            <button class="back-btn" onclick="showCalendarView()">← Calendario</button>
+            <h2 id="selected-date-title" style="font-family:'Outfit', sans-serif; font-size: 16px; color: #ff7b47;">Día</h2>
+        </div>
+
+        <div class="inventory-table-container">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="text-align:center;">Inicio</th>
+                        <th style="text-align:center;">Repo</th>
+                        <th style="text-align:center;">Cierre</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="actions-bar">
+            <button class="btn-save" onclick="saveInventory()">Guardar Cierre y Requisición</button>
+            <button class="btn-export" onclick="exportData()">Respaldar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Requisición -->
+<div id="req-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>📋 Lista de Requisición Recomendada</h2>
+            <button class="close-modal" onclick="closeModal()">×</button>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Basado en el cierre registrado, se sugiere pedir lo siguiente para abastecer stock:</p>
+        <ul id="req-list-items" class="req-list"></ul>
+        <button class="main-btn" style="margin-bottom: 0; padding: 12px;" onclick="closeModal()">Aceptar y Continuar</button>
+    </div>
+</div>
+
+<script>
+    const products = [
+        "Polar Pilsen",
+        "Polar Light",
+        "Solera Azul",
+        "Solera Verde",
+        "Zulia",
+        "Cerveza Artesanal",
+        "Bombita",
+        "Lata",
+        "Agua",
+        "Agua Saborizada",
+        "Soda",
+        "Aguakina",
+        "Ginger Beer",
+        "Espumante",
+        "Vinos",
+        "Sangría",
+        "Licor de ron, tamarindo blanco",
+        "Licor de ron, carupano silver",
+        "Licor de ron, carta roja",
+        "Cocuy agape",
+        "Aperol",
+        "Ron añejo Pampero",
+        "Ron añejo",
+        "Ron Carupano 6 años",
+        "Ron Carupano Cristalino",
+        "Chimeneaud",
+        "Naiguata",
+        "Moneda de oro",
+        "Triple sec",
+        "Curacao azul",
+        "Licor de café",
+        "Anis Bandera",
+        "Tequila sol maya",
+        "Amaretto",
+        "Limoncello",
+        "Old Parr 12",
+        "Buchanan's 12",
+        "Grants 8",
+        "Grants 12",
+        "7up 1L"
+    ];
+
+    let currentDate = new Date();
+    let selectedDateStr = "";
+    let db = JSON.parse(localStorage.getItem('terraza_grill_inv') || '{}');
+
+    function initApp() {
+        updateStats();
+    }
+
+    function showHomeView() {
+        switchView('home-view');
+        updateStats();
+    }
+
+    function showCalendarView() {
+        switchView('calendar-view');
+        renderCalendar();
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+
+    function updateStats() {
+        const keys = Object.keys(db);
+        document.getElementById('stat-days').innerText = keys.length;
+        if(keys.length > 0) {
+            const last = keys.sort().pop();
+            document.getElementById('stat-last').innerText = last;
+        } else {
+            document.getElementById('stat-last').innerText = "Ninguno";
+        }
+    }
+
+    function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        document.getElementById('calendar-month-title').innerText = `${monthNames[month]} ${year}`;
+
+        const grid = document.getElementById('cal-days-grid');
+        grid.innerHTML = '';
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const adjustedFirstDay = (firstDayIndex === 0) ? 6 : firstDayIndex - 1;
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        for(let i = 0; i < adjustedFirstDay; i++) {
+            grid.appendChild(document.createElement('div'));
+        }
+
+        const today = new Date();
+
+        for(let d = 1; d <= totalDays; d++) {
+            const dayCell = document.createElement('div');
+            dayCell.className = 'cal-day';
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            
+            if(d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                dayCell.classList.add('today');
+            }
+            if(db[dateStr]) {
+                dayCell.classList.add('has-data');
+            }
+
+            dayCell.innerHTML = `<span>${d}</span>${db[dateStr] ? '<div class="dot-indicator"></div>' : ''}`;
+            dayCell.onclick = () => openDayInventory(dateStr);
+            grid.appendChild(dayCell);
+        }
+    }
+
+    function changeMonth(direction) {
+        currentDate.setMonth(currentDate.getMonth() + direction);
+        renderCalendar();
+    }
+
+    function openDayInventory(dateStr) {
+        selectedDateStr = dateStr;
+        document.getElementById('selected-date-title').innerText = `Inventario: ${dateStr}`;
+        
+        const tbody = document.getElementById('inventory-tbody');
+        tbody.innerHTML = '';
+
+        const dayData = db[dateStr] || {};
+
+        products.forEach((prod, index) => {
+            const item = dayData[index] || { inicio: '', repo: '', cierre: '' };
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="product-name">${prod}</td>
+                <td style="text-align:center;"><input type="number" class="inv-input" data-idx="${index}" data-field="inicio" value="${item.inicio}"></td>
+                <td style="text-align:center;"><input type="number" class="inv-input" data-idx="${index}" data-field="repo" value="${item.repo}"></td>
+                <td style="text-align:center;"><input type="number" class="inv-input" data-idx="${index}" data-field="cierre" value="${item.cierre}"></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        switchView('inventory-view');
+    }
+
+    function saveInventory() {
+        const inputs = document.querySelectorAll('.inv-input');
+        if(!db[selectedDateStr]) db[selectedDateStr] = {};
+
+        inputs.forEach(input => {
+            const idx = input.getAttribute('data-idx');
+            const field = input.getAttribute('data-field');
+            if(!db[selectedDateStr][idx]) db[selectedDateStr][idx] = { inicio: '', repo: '', cierre: '' };
+            db[selectedDateStr][idx][field] = input.value;
+        });
+
+        localStorage.setItem('terraza_grill_inv', JSON.stringify(db));
+        updateStats();
+        generateRequisitionModal(db[selectedDateStr]);
+    }
+
+    function generateRequisitionModal(dayData) {
+        const reqList = document.getElementById('req-list-items');
+        reqList.innerHTML = '';
+        let missingCount = 0;
+
+        products.forEach((prod, idx) => {
+            const item = dayData[idx];
+            const cierreVal = item && item.cierre !== '' ? parseInt(item.cierre) : 0;
+            
+            if(cierreVal <= 4) {
+                missingCount++;
+                const needed = 10 - cierreVal;
+                const li = document.createElement('li');
+                li.className = 'req-item';
+                li.innerHTML = `<span>${prod} (Cierre: ${cierreVal})</span> <span class="req-qty">Pedir: +${needed} und</span>`;
+                reqList.appendChild(li);
+            }
+        });
+
+        if(missingCount === 0) {
+            const li = document.createElement('li');
+            li.className = 'req-item';
+            li.style.justifyContent = 'center';
+            li.innerHTML = `<span style="color: #81c784;">¡Todo en orden! Stock suficiente en barra.</span>`;
+            reqList.appendChild(li);
+        }
+
+        document.getElementById('req-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('req-modal').style.display = 'none';
+        showCalendarView();
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+        const dlAnchorElem = document.createElement('a');
+        dlAnchorElem.setAttribute("href", dataStr);
+        dlAnchorElem.setAttribute("download", "inventario_terraza_grill.json");
+        dlAnchorElem.click();
+    }
+
+    initApp();
+</script>
+
+</body>
+</html>
