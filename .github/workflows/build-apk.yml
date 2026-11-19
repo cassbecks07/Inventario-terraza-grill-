@@ -22,7 +22,7 @@ jobs:
           node-version: '20'
 
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -35,15 +35,27 @@ jobs:
           mkdir -p android-wrapper
           cd android-wrapper
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Terraza Grill" "com.terrazagrill.inventario" --web-dir ../
-          npx cap add android
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npx cap init "Terraza Grill" "com.terrazagrill.inventario" --web-dir ../www
+
+          mkdir -p www
+          cat << 'EOF' > www/index.html
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0; url=https://cassbecks07.github.io/Inventario-terraza-grill-/">
+            <title>Terraza Grill</title>
+          </head>
+          <body></body>
+          </html>
+          EOF
 
           cat << 'EOF' > capacitor.config.json
           {
             "appId": "com.terrazagrill.inventario",
             "appName": "Terraza Grill",
-            "webDir": "../",
+            "webDir": "www",
             "server": {
               "url": "https://cassbecks07.github.io/Inventario-terraza-grill-/",
               "cleartext": true
@@ -51,6 +63,7 @@ jobs:
           }
           EOF
 
+          npx cap add android
           npx cap sync android
 
       - name: Build Debug APK
