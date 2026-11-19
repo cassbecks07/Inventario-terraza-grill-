@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,18 +31,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK Licenses
+        run: |
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
 
       - name: Initialize Capacitor Android project
         run: |
-          mkdir -p android-wrapper
+          mkdir -p android-wrapper/www
           cd android-wrapper
-          npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
-          npx cap init "Terraza Grill" "com.terrazagrill.inventario" --web-dir ../www
 
-          mkdir -p www
           cat << 'EOF' > www/index.html
           <!DOCTYPE html>
           <html lang="es">
@@ -50,6 +52,10 @@ jobs:
           <body></body>
           </html>
           EOF
+
+          npm init -y
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npx cap init "Terraza Grill" "com.terrazagrill.inventario" --web-dir www
 
           cat << 'EOF' > capacitor.config.json
           {
@@ -68,6 +74,7 @@ jobs:
 
       - name: Build Debug APK
         run: |
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
           cd android-wrapper/android
           chmod +x gradlew
           ./gradlew assembleDebug
