@@ -199,13 +199,6 @@
             margin-bottom: 20px;
         }
 
-        .cal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
         .cal-nav-btn {
             background: #2a2a2a;
             border: 1px solid var(--border-color);
@@ -278,7 +271,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             background: var(--card-dark);
             padding: 14px 18px;
             border-radius: 12px;
@@ -296,13 +289,56 @@
             cursor: pointer;
         }
 
+        /* Barra para agregar nuevo ítem */
+        .add-item-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .add-item-input {
+            flex: 1;
+            background: #141414;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .add-item-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-add-item {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-add-item:active {
+            transform: scale(0.98);
+        }
+
         .inventory-table-container {
             background: var(--card-dark);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             overflow-x: auto;
             margin-bottom: 20px;
-            max-height: 60vh;
+            max-height: 55vh;
         }
 
         .inventory-table {
@@ -535,6 +571,12 @@
             <h2 id="selected-date-title" style="font-family:'Outfit', sans-serif; font-size: 16px; color: #ff7b47;">Día</h2>
         </div>
 
+        <!-- Formulario para agregar ítem -->
+        <div class="add-item-box">
+            <input type="text" id="new-item-input" class="add-item-input" placeholder="Nuevo producto o licor..." onkeypress="handleEnter(event)">
+            <button class="btn-add-item" onclick="addNewProduct()">+ Agregar</button>
+        </div>
+
         <div class="inventory-table-container">
             <table class="inventory-table">
                 <thead>
@@ -570,7 +612,7 @@
 </div>
 
 <script>
-    const products = [
+    const defaultProducts = [
         "Polar Pilsen",
         "Polar Light",
         "Solera Azul",
@@ -612,6 +654,12 @@
         "Grants 12",
         "7up 1L"
     ];
+
+    let products = JSON.parse(localStorage.getItem('terraza_grill_products'));
+    if (!products || !Array.isArray(products) || products.length === 0) {
+        products = [...defaultProducts];
+        localStorage.setItem('terraza_grill_products', JSON.stringify(products));
+    }
 
     let currentDate = new Date();
     let selectedDateStr = "";
@@ -690,14 +738,11 @@
         renderCalendar();
     }
 
-    function openDayInventory(dateStr) {
-        selectedDateStr = dateStr;
-        document.getElementById('selected-date-title').innerText = `Inventario: ${dateStr}`;
-        
+    function renderInventoryRows() {
         const tbody = document.getElementById('inventory-tbody');
         tbody.innerHTML = '';
 
-        const dayData = db[dateStr] || {};
+        const dayData = db[selectedDateStr] || {};
 
         products.forEach((prod, index) => {
             const item = dayData[index] || { inicio: '', repo: '', cierre: '' };
@@ -710,8 +755,44 @@
             `;
             tbody.appendChild(tr);
         });
+    }
 
+    function openDayInventory(dateStr) {
+        selectedDateStr = dateStr;
+        document.getElementById('selected-date-title').innerText = `Inventario: ${dateStr}`;
+        renderInventoryRows();
         switchView('inventory-view');
+    }
+
+    function handleEnter(e) {
+        if (e.key === 'Enter') {
+            addNewProduct();
+        }
+    }
+
+    function addNewProduct() {
+        const input = document.getElementById('new-item-input');
+        const name = input.value.trim();
+        if (!name) return;
+
+        // Guardar valores escritos actualmente antes de re-renderizar
+        const currentInputs = document.querySelectorAll('.inv-input');
+        if (!db[selectedDateStr]) db[selectedDateStr] = {};
+        currentInputs.forEach(inp => {
+            const idx = inp.getAttribute('data-idx');
+            const field = inp.getAttribute('data-field');
+            if (!db[selectedDateStr][idx]) db[selectedDateStr][idx] = { inicio: '', repo: '', cierre: '' };
+            db[selectedDateStr][idx][field] = inp.value;
+        });
+
+        products.push(name);
+        localStorage.setItem('terraza_grill_products', JSON.stringify(products));
+        input.value = '';
+        renderInventoryRows();
+
+        // Hacer scroll hasta el final de la tabla para ver el nuevo ítem
+        const container = document.querySelector('.inventory-table-container');
+        container.scrollTop = container.scrollHeight;
     }
 
     function saveInventory() {
@@ -766,7 +847,11 @@
     }
 
     function exportData() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+        const payload = {
+            productos: products,
+            inventario: db
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
         const dlAnchorElem = document.createElement('a');
         dlAnchorElem.setAttribute("href", dataStr);
         dlAnchorElem.setAttribute("download", "inventario_terraza_grill.json");
